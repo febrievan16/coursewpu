@@ -10,16 +10,20 @@ Route::get('/', function () {
 });
 
 Route::get('/blog', function () {
-    $posts = Post::all();
+    $posts = Post::with(['author', 'category'])->latest()->get(); 
+    // perintah diatas adalah eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
     return view('blog', ['title' => 'Daftar Blog', 'posts' => $posts]);
 });
 
 Route::get('/author/{user:username}', function (User $user) {
-    return view('blog', ['title' => count($user->posts) . ' Article by ' . $user->name, 'posts' => $user->posts]);
+    $posts = $user->posts->load(['author', 'category']);
+    // perintah diatas adalah lazy eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
+    return view('blog', ['title' => count($posts) . ' Article by ' . $user->name, 'posts' => $posts]);
 });
 
 Route::get('/categories/{category:slug}', function (Category $category) {
-    return view('blog', ['title' => 'Category: ' . $category->name, 'posts' => $category->posts]);
+    $posts = $category->posts->load(['author', 'category']);
+    return view('blog', ['title' => 'Category: ' . $category->name, 'posts' => $posts]);
 });
 
 Route::get('/sblog/{post:slug}', function(Post $post) {

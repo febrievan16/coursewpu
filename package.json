@@ -17,6 +17,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "@tailwindplus/elements": "^1.0.22"
+        "@tailwindplus/elements": "^1.0.22",
+        "flowbite": "^4.0.2"
     }
 }
