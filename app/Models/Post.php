@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,5 +27,26 @@ class Post extends Model
     public function category(): BelongsTo 
     {
         return $this->belongsTo(Category::class);    
+    }
+
+    /**
+     * Local query scope untuk pencarian berdasarkan title, author (name), dan category (name).
+     * Penggunaan: Post::search($keyword)->get();
+     */
+    public function scopeSearch(Builder $query, ?string $search): Builder
+    {
+        if (blank($search)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $query) use ($search) {
+            $query->where('title', 'like', '%' . $search . '%')
+                ->orWhereHas('author', function (Builder $query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('category', function (Builder $query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+        });
     }
 }

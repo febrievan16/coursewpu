@@ -10,9 +10,13 @@ Route::get('/', function () {
 });
 
 Route::get('/blog', function () {
-    $posts = Post::with(['author', 'category'])->latest()->get(); 
+    $posts = Post::with(['author', 'category'])->latest(); 
     // perintah diatas adalah eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
-    return view('blog', ['title' => 'Daftar Blog', 'posts' => $posts]);
+
+    $posts->search(request('search'));
+    // fungsi search (local query scope) untuk pencarian berdasarkan title, author, dan category
+
+    return view('blog', ['title' => 'Daftar Blog', 'posts' => $posts->get()]);
 });
 
 Route::get('/author/{user:username}', function (User $user) {
