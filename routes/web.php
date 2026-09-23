@@ -10,25 +10,21 @@ Route::get('/', function () {
 });
 
 Route::get('/blog', function () {
-    $posts = Post::with(['author', 'category'])->latest(); 
-    // perintah diatas adalah eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
+    $posts = Post::latest()->filter(request(['search', 'category', 'author']))->paginate(6)->withQueryString(); 
 
-    $posts->search(request('search'));
-    // fungsi search (local query scope) untuk pencarian berdasarkan title, author, dan category
-
-    return view('blog', ['title' => 'Daftar Blog', 'posts' => $posts->get()]);
+    return view('blog', ['title' => 'Daftar Blog', 'posts' => $posts]);
 });
 
-Route::get('/author/{user:username}', function (User $user) {
-    $posts = $user->posts->load(['author', 'category']);
-    // perintah diatas adalah lazy eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
-    return view('blog', ['title' => count($posts) . ' Article by ' . $user->name, 'posts' => $posts]);
-});
+// Route::get('/author/{user:username}', function (User $user) {
+//     $posts = $user->posts->load(['author', 'category']);
+//     // perintah diatas adalah lazy eager loading berfungsi untuk memangil query dahulu sehingga tidak bertumpuk
+//     return view('blog', ['title' => count($posts) . ' Article by ' . $user->name, 'posts' => $posts]);
+// });
 
-Route::get('/categories/{category:slug}', function (Category $category) {
-    $posts = $category->posts->load(['author', 'category']);
-    return view('blog', ['title' => 'Category: ' . $category->name, 'posts' => $posts]);
-});
+// Route::get('/categories/{category:slug}', function (Category $category) {
+//     $posts = $category->posts->load(['author', 'category']);
+//     return view('blog', ['title' => 'Category: ' . $category->name, 'posts' => $posts]);
+// });
 
 Route::get('/sblog/{post:slug}', function(Post $post) {
     return view('sblog', ['title' => 'Single blog', 'post' => $post]);

@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Post extends Model
 {
-    //kalau misal nama table di database tidak sama dgn model misal model Post tapi nama tabel misal "Belum_post" atau table dgn nama lain maka kodingnya seprti di bawah
+    //kalau misal nama table di database tidak sama dgn model misal model Post tapi nama tabel misal "Belum_post" atau table dgn nama lain maka kodinganya seprti di bawah
     // protected $tbale = 'belum_post';
-    
+
     use HasFactory;
 
     protected $fillable = ['title', 'slug', 'author_id', 'body', 'category_id'];
@@ -24,29 +24,33 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function category(): BelongsTo 
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);    
+        return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Local query scope untuk pencarian berdasarkan title, author (name), dan category (name).
-     * Penggunaan: Post::search($keyword)->get();
-     */
-    public function scopeSearch(Builder $query, ?string $search): Builder
-    {
-        if (blank($search)) {
-            return $query;
-        }
 
-        return $query->where(function (Builder $query) use ($search) {
-            $query->where('title', 'like', '%' . $search . '%')
-                ->orWhereHas('author', function (Builder $query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('category', function (Builder $query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%');
-                });
+    public function scopeFilter(Builder $query, array $filters): void
+    {
+        $query->when($filters['search'] ?? false, function ($query, $search)  {
+           return $query->where('title', 'like', '%' . $search . '%');
         });
+
+        $query->when($filters['category'] ?? false, function ($query, $category)  {
+           return $query->whereHas(
+            'category', 
+            fn(Builder $query) => 
+            $query->where('slug', $category)
+           );
+        });
+
+        $query->when($filters['author'] ?? false, function ($query, $author)  {
+           return $query->whereHas(
+            'author', 
+            fn(Builder $query) => 
+            $query->where('username', $author)
+           );
+        });
+
     }
 }

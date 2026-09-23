@@ -16,7 +16,15 @@
 
   <div class="py-8 px-4 mx-auto max-w-7xl lg:py-16 lg:px-6">
     
-    <form class="flex items-center max-w-sm mx-auto space-x-2 mb-6">   
+    <form class="flex items-center max-w-sm mx-auto space-x-2 mb-6"> 
+        @if (request('category'))
+            <input type="hidden" name="category" value="{{ request('category') }}">
+
+        @endif
+        @if (request('author'))
+            <input type="hidden" name="author" value="{{ request('author') }}">
+
+        @endif  
         <label for="simple-search" class="sr-only">Search</label>
         <div class="relative w-full">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -30,12 +38,14 @@
         </button>
     </form>
     
-      <div class="grid gap-8 lg:grid-cols-3 md:grid-cols-2">
+    {{ $posts->links() }} {{-- scrip pagination halaman  --}}
 
-        @foreach ($posts as $post)
+      <div class="mt-4 grid gap-8 lg:grid-cols-3 md:grid-cols-2">
+
+        @forelse ($posts as $post)
           <article class="p-6 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
               <div class="flex justify-between items-center mb-5 text-gray-500">
-                <a href="/categories/{{ $post->category->slug }}">
+                <a href="/blog?category={{ $post->category->slug }}">
                   <span class="{{ $post->category->colour }} text-primary-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-primary-200 dark:text-primary-800 hover:underline">
                      {{ $post->category->name }}
                   </span>
@@ -48,7 +58,7 @@
                   <div class="flex items-center space-x-4">
                       <img class="w-7 h-7 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png" alt="{{ $post->author->name }}" />
                       <span class="font-medium text-sm dark:text-white">
-                          <a href="/author/{{ $post->author->username }}" class="hover:underline">{{ $post->author->name }}</a>
+                          <a href="/blog?author={{ $post->author->username }}" class="hover:underline">{{ $post->author->name }}</a>
                       </span>
                   </div>
                   <a href="/sblog/{{ $post['slug'] }}" class="inline-flex text-sm items-center font-medium text-blue-500 text-primary-600 dark:text-primary-500 hover:underline">
@@ -57,8 +67,13 @@
                         </a>
                   </a>
               </div>
-          </article> 
-         @endforeach     
+          </article>
+          @empty
+          <div>
+            <p class="font-semibold text-xl my-4">Artikel Tidak ditemukan!!</p>
+            <a href="/blog" class="block text-blue-500 hover:underline">&laquo; Kembali ke semua blog</a>    
+        </div> 
+         @endforelse     
       </div>  
   </div>
 
